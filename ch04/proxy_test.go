@@ -26,7 +26,7 @@ func TestProxy(t *testing.T) {
 
 	// server listens for a "ping" message and responds with a
 	// "pong" message. All other messages are echoed back to the client.
-	server, err := net.Listen("tcp", "127.0.0.1:")
+	server, err := net.Listen("tcp", "127.0.0.1:7384")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestProxy(t *testing.T) {
 	// proxyServer proxies messages from client connections to the
 	// destinationServer. Replies from the destinationServer are proxied
 	// back to the clients.
-	proxyServer, err := net.Listen("tcp", "127.0.0.1:")
+	proxyServer, err := net.Listen("tcp", "127.0.0.1:8384")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,8 +94,7 @@ func TestProxy(t *testing.T) {
 
 			go func(from net.Conn) {
 				defer from.Close()
-				to, err := net.Dial("tcp",
-					server.Addr().String())
+				to, err := net.Dial("tcp", server.Addr().String())
 				if err != nil {
 					t.Error(err)
 					return
@@ -133,8 +132,10 @@ func TestProxy(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		actual := string(buf[:n])
+		t.Logf("%q -> proxy -> %q", m.Message, actual)
 
-		if actual := string(buf[:n]); actual != m.Reply {
+		if actual != m.Reply {
 			t.Errorf("%d: expected reply: %q; actual: %q",
 				i, m.Reply, actual)
 		}
